@@ -8,7 +8,7 @@ class Animals:
 
 
     def __str__(self):
-        return str ({
+        return str({
             'name': self.name,
             'size': self.size,
             'paws': self.paws,
@@ -17,19 +17,17 @@ class Animals:
         })
 
 class Birds(Animals):
-    name_bird = ['Утки', 'Куры', 'Гуси']
 
     def __init__(self, name_bird):
         self.name_bird = name_bird
-        Animals.__init__ ( self, name_bird, 'Small', 2, 'None', 'Yes' )
+        Animals.__init__(self, name_bird, 'Small', 2, 'None', 'Yes')
 
 
 class Animal(Animals):
-    name_animal = ['Коровы', 'Козы', 'Овцы', 'Свиньи']
 
     def __init__(self, name_animal):
         self.name_animal = name_animal
-        Animals.__init__ ( self, name_animal, 'Big', 4, 'Yes', 'None' )
+        Animals.__init__(self, name_animal, 'Big', 4, 'Yes', 'None')
 
 
 ducks = Birds('Утки')
