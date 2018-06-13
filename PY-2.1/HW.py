@@ -8,15 +8,15 @@ def get_cook_book_from_file():  #   data.txt
                 break
             count_ingridient = f.readline().strip()
             dish = []
-            dish_list = []
+
             for i in range(int(count_ingridient)):
-                dish_list.append(f.readline().strip())
-            for i in dish_list:
-                dish_list = i.split('|')
+                dish_list = (f.readline().strip().split('|'))
                 dish.append({'ingridient_name': dish_list[0], 'quantity': int(dish_list[1]), 'measure': dish_list[2]})
             cook_book[name_dish] = dish
-            f.readline().strip()
+            f.readline()
+
     return cook_book
+
 
 
 def get_shop_list_by_dishes(dishes, person_count, cook_book):
@@ -38,14 +38,14 @@ def get_shop_list_by_dishes(dishes, person_count, cook_book):
 
 
 def print_shop_list(shop_list):
-    for shop_list_item in shop_list.values ():
+    for shop_list_item in shop_list.values():
         print('{} {} {}'.format(shop_list_item['ingridient_name'], shop_list_item['quantity'], shop_list_item['measure']))
 
 
 def create_shop_list():
     cook_book = get_cook_book_from_file()
     print('\n---МЕНЮ---')
-    for dish in cook_book:
+    for dish in enumerate(cook_book, 1):
         print(dish)
     person_count = int(input('\n Введите количество человек: '))
     dishes = input('Введите блюда из меню в расчете на одного человека (через запятую): ').lower().split(', ')
