@@ -1,11 +1,11 @@
 class Animals:
+
     def __init__(self, name, size, paws, hoofs, wings):
         self.name = name
         self.size = size
         self.paws = paws
         self.hoofs = hoofs
         self.wings = wings
-
 
     def __str__(self):
         return str({
@@ -15,6 +15,7 @@ class Animals:
             'hoofs': self.hoofs,
             'wings': self.wings,
         })
+
 
 class Birds(Animals):
 
@@ -38,14 +39,13 @@ goats = Animal('Козы')
 sheep = Animal('Овцы')
 pigs = Animal('Свиньи')
 
-print( '\n Класс Пернатые:',
-        '\n', ducks.name, '{}'.format(ducks),
-        '\n', chickens.name, '{}'.format(chickens),
-        '\n', geese.name, '{}'.format(geese))
+print('\n Класс Пернатые:',
+      '\n', ducks.name, '{}'.format(ducks),
+      '\n', chickens.name, '{}'.format(chickens),
+      '\n', geese.name, '{}'.format(geese))
 
-print( '\n Класс Животные:',
-        '\n', cows.name, '{}'.format(cows),
-        '\n', goats.name, '{}'.format (goats),
-        '\n', sheep.name, '{}'.format (sheep),
-        '\n', pigs.name, '{}'.format(pigs))
-
+print('\n Класс Животные:',
+      '\n', cows.name, '{}'.format(cows),
+      '\n', goats.name, '{}'.format(goats),
+      '\n', sheep.name, '{}'.format(sheep),
+      '\n', pigs.name, '{}'.format(pigs))
