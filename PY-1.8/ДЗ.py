@@ -20,32 +20,32 @@ class Birds(Animals):
 
     def __init__(self, name_bird):
         self.name_bird = name_bird
-        Animals.__init__(self, name_bird, 'Small', 2, 'None', 'Yes')
+        super().__init__(name_bird, 'Small', 2, 'None', 'Yes')
 
 
 class Animal(Animals):
 
     def __init__(self, name_animal):
         self.name_animal = name_animal
-        Animals.__init__(self, name_animal, 'Big', 4, 'Yes', 'None')
+        super().__init__(name_animal, 'Big', 4, 'Yes', 'None')
 
 
 ducks = Birds('Утки')
 chickens = Birds('Куры')
 geese = Birds('Гуси')
-Cows = Animal('Коровы')
-Goats = Animal('Козы')
-Sheep = Animal('Овцы')
-Pigs = Animal('Свиньи')
+cows = Animal('Коровы')
+goats = Animal('Козы')
+sheep = Animal('Овцы')
+pigs = Animal('Свиньи')
 
-print ( '\n Класс Пернатые:',
-        '\n Утки: {}'.format(ducks),
-        '\n Куры: {}'.format(chickens),
-        '\n Гуси: {}'.format(geese))
+print( '\n Класс Пернатые:',
+        '\n', ducks.name, '{}'.format(ducks),
+        '\n', chickens.name, '{}'.format(chickens),
+        '\n', geese.name, '{}'.format(geese))
 
-print ( '\n Класс Животные:',
-        '\n Коровы: {}'.format(Cows),
-        '\n Козы: {}'.format (Goats),
-        '\n Овцы: {}'.format (Sheep),
-        '\n Свиньи: {}'.format(Pigs))
+print( '\n Класс Животные:',
+        '\n', cows.name, '{}'.format(cows),
+        '\n', goats.name, '{}'.format (goats),
+        '\n', sheep.name, '{}'.format (sheep),
+        '\n', pigs.name, '{}'.format(pigs))
 
