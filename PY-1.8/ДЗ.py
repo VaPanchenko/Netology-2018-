@@ -40,49 +40,49 @@ class Chicken(Birds):
     bird_type = 'Куры'
 
     def __init__(self, name):
-        super(Chicken, self).__init__(name, Chicken.bird_type)
+        super().__init__(name, Chicken.bird_type)
 
 
 class Ducks(Birds):
     bird_type = 'Утки'
 
     def __init__(self, name):
-        super(Ducks, self).__init__(name, Ducks.bird_type)
+        super().__init__(name, Ducks.bird_type)
 
 
 class Geese(Birds):
     bird_type = 'Гуси'
 
     def __init__(self, name):
-        super(Geese, self).__init__(name, Geese.bird_type)
+        super().__init__(name, Geese.bird_type)
 
 
 class Cows(Animal):
     animal_type = 'Коровы'
 
     def __init__(self, name):
-        super(Cows, self).__init__(name, Cows.animal_type)
+        super().__init__(name, Cows.animal_type)
 
 
 class Goats(Animal):
     animal_type = 'Козы'
 
     def __init__(self, name):
-        super(Goats, self).__init__(name, Goats.animal_type)
+        super().__init__(name, Goats.animal_type)
 
 
 class Sheep(Animal):
     animal_type = 'Овцы'
 
     def __init__(self, name):
-        super(Sheep, self).__init__(name, Sheep.animal_type)
+        super().__init__(name, Sheep.animal_type)
 
 
 class Pigs(Animal):
     animal_type = 'Свиньи'
 
     def __init__(self, name):
-        super(Pigs, self).__init__(name, Pigs.animal_type)
+        super().__init__(name, Pigs.animal_type)
 
 
 ducks = Ducks('Утки')
