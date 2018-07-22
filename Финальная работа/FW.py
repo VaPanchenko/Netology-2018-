@@ -47,6 +47,7 @@ def get_groups_target_user(user_id):
 
 
 def get_groups(friends):
+    print('Формирование словаря групп друзей пользователя {} (id {})'.format(user, user_id))
 
     groups = {}
     bar = progressbar.ProgressBar(max_value=len(friends))
@@ -73,7 +74,7 @@ def get_groups(friends):
 
 user_id = get_user_id()
 friends = get_friends(user_id)
-print(get_groups_target_user(user_id))
+# print(get_groups_target_user(user_id))
 groups = get_groups(friends)
 print(groups)
 
