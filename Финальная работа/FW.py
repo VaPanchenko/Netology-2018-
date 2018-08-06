@@ -4,69 +4,105 @@ import time
 import json
 
 
-with open('user.json', 'r', encoding='utf8') as file:
-    data = json.load(file)
+class DeletedUser(Exception):
+    pass
 
-user = data['user']
-v = data['v']
-TOKEN = data['TOKEN']
+
+class AccessDenied(Exception):
+    pass
+
+
+class UnknownError(Exception):
+    pass
+
+
+class PermissionDenied(Exception):
+    pass
+
+
+with open('user.json', 'r', encoding='utf8') as file:
+    config = json.load(file)
+
+user = config['user']
+v = config['v']
+TOKEN = config['TOKEN']
+API_URL = 'https://api.vk.com/method/'
+
+
+def do_api_call(api, params={}):
+
+    params['access_token'] = TOKEN
+    params['v'] = v
+
+    ready = False
+
+    while not ready:
+
+        result = requests.get(API_URL + api, params=params).json()
+
+        if 'error' in result:
+            if result['error']['error_code'] == 18:
+                raise DeletedUser()
+            elif result['error']['error_code'] == 15:
+                raise AccessDenied()
+            elif result['error']['error_code'] == 10:
+                raise UnknownError()
+            elif result['error']['error_code'] == 7:
+                raise PermissionDenied()
+            elif result['error']['error_code'] == 6:
+                time.sleep(0.34)
+                continue
+            else:
+                print(result)
+                raise Exception
+        else:
+            ready = True
+    try:
+        api_call_result = result['response']
+    except KeyError:
+        print(result)
+        raise
+    return api_call_result
 
 
 def get_user_id():
 
     print('Получение User ID пользователя: {}'.format(user))
 
-    params = {
-        'access_token': TOKEN,
-        'v': v,
-        'user_ids': user,
-    }
+    try:
+        r = do_api_call('users.get', params={'user_ids': user})
+        result = r[0]['id']
 
-    while True:
-        user_id = requests.get('https://api.vk.com/method/users.get',
-                               params=params).json()['response'][0]['id']
-        if user_id:
-            break
+    except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+        result = []
 
-    return user_id
+    return result
 
 
 def get_friends(user_id):
 
     print('Получение списка друзей пользователя')
 
-    params = {
-        'access_token': TOKEN,
-        'v': v,
-        'user_id': user_id,
-    }
+    try:
+        r = do_api_call('friends.get', params={'user_id': user_id})
+        result = r['items']
 
-    while True:
-        friends = requests.get('https://api.vk.com/method/friends.get',
-                               params=params).json()['response']['items']
-        if friends:
-            break
+    except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+        result = []
 
-    return friends
+    return result
 
 
 def get_groups_target_user(user_id):
 
     print('Получение списка групп пользователя')
+    try:
+        r = do_api_call('groups.get', params={'user_id': user_id})
+        result = r['items']
+    except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+        result = []
 
-    params = {
-        'access_token': TOKEN,
-        'v': v,
-        'user_id': user_id,
-    }
-
-    while True:
-        groups = requests.get('https://api.vk.com/method/groups.get',
-                          params=params).json()['response']['items']
-        if groups:
-            break
-
-    return groups
+    return result
 
 
 def get_groups(friends):
@@ -74,73 +110,41 @@ def get_groups(friends):
     print('Формирование словаря групп друзей пользователя')
     groups = {}
     bar = progressbar.ProgressBar(max_value=len(friends))
-    d = dict()
 
     for i, friend in enumerate(friends):
         try:
-            params = {
-                'access_token': TOKEN,
-                'v': v,
-                'user_id': friend,
-            }
-            while True:
-
-                groups.update({friend: requests.get('https://api.vk.com/method/groups.get',
-                                                 params=params).json()['response']['items']})
-                if groups:
-                    break
-                print(type(groups.get(88220)))
-
-
+            r = do_api_call('groups.get', params={'user_id': friend})
+            groups.update({friend: r['items']})
             bar.update(i)
-            time.sleep(0.33)
-
-        except Exception as e:
-            if e == (KeyError or ValueError):
-                continue
-            else:
-                print(friend)
-                print(Exception)
-                continue
-
+        except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+            continue
 
     return groups
 
 
-def get_user_groups_info(union_user_groups):
+def get_user_groups_info(difference_user_groups):
 
     groups_user_list_info = []
     info_list = []
     print('\nПолучение данных об уникальных группах пользователя')
 
-    group_list = [union_user_groups[i:i + 500] for i in range(0, len(union_user_groups), 500)]
-    bar = progressbar.ProgressBar(max_value=len(group_list))
+    group_list = [difference_user_groups[i:i + 500] for i in range(0, len(difference_user_groups), 500)]
 
     for group in group_list:
-        group = [(', '.join([str(i) for i in group]))]
+        group = (', '.join([str(i) for i in group]))
 
-        params = {
-            'access_token': TOKEN,
-            'v': v,
-            'group_ids': group,
-            'fields': 'members_count'
-        }
+        try:
+            group_info = do_api_call('groups.getById', params={'group_ids': group, 'fields': 'members_count'})
 
-        while True:
-            group_info = requests.get('https://api.vk.com/method/groups.getById',
-                         params=params).json()['response']
-            if group_info:
-                break
+        except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+            continue
 
-        groups_user_list_info.append(group_info)
+        groups_user_list_info.extend(group_info)
 
-        bar.update(group)
-        time.sleep(0.34)
+    for group in groups_user_list_info:
 
-    for i in range(len(union_user_groups)):
-
-        info_list.append({'gid': groups_user_list_info[0][i]['id'], 'name': groups_user_list_info[0][i]['name'],
-                     'members_count': groups_user_list_info[0][i]['members_count']})
+        info_list.append({'gid': group['id'], 'name': group['name'],
+                            'members_count': group['members_count']})
 
     return info_list
 
@@ -156,9 +160,9 @@ def main():
     for i in user_friends_group:
         union_friends_groups = union_friends_groups.union(set(user_friends_group.get(i)))
 
-    union_user_groups = list(user_groups.difference(union_friends_groups))
+    difference_user_groups = list(user_groups.difference(union_friends_groups))
 
-    result = get_user_groups_info(union_user_groups)
+    result = get_user_groups_info(difference_user_groups)
 
     with open('groups.json', 'w', encoding='utf8') as file:
         json.dump(result, file,  ensure_ascii=False)
