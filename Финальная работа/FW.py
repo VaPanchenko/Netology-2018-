@@ -4,6 +4,13 @@ import time
 import json
 
 
+Deleted_User = 18
+Access_Denied = 15
+Internal_server_error = 10
+Permission_Denied = 7
+Too_many_requests_per_second = 6
+
+
 class DeletedUser(Exception):
     pass
 
@@ -29,39 +36,44 @@ TOKEN = config['TOKEN']
 API_URL = 'https://api.vk.com/method/'
 
 
-def do_api_call(api, params={}):
+def do_api_call(api, params=None):
 
+    params = params or {}
     params['access_token'] = TOKEN
     params['v'] = v
 
-    ready = False
-
-    while not ready:
+    while True:
 
         result = requests.get(API_URL + api, params=params).json()
 
         if 'error' in result:
-            if result['error']['error_code'] == 18:
+            if result['error']['error_code'] == Deleted_User:
+                print(result['error']['error_msg'], 'user/group - ',
+                        result['error']['request_params'][2]['value'])
                 raise DeletedUser()
-            elif result['error']['error_code'] == 15:
+            elif result['error']['error_code'] == Access_Denied:
+                print(result['error']['error_msg'], 'user/group - ',
+                        result['error']['request_params'][2]['value'])
                 raise AccessDenied()
-            elif result['error']['error_code'] == 10:
+            elif result['error']['error_code'] == Internal_server_error:
+                print(result['error']['error_msg'], 'user/group - ',
+                        result['error']['request_params'][2]['value'])
                 raise UnknownError()
-            elif result['error']['error_code'] == 7:
+            elif result['error']['error_code'] == Permission_Denied:
+                print(result['error']['error_msg'], 'user/group - ',
+                        result['error']['request_params'][2]['value'])
                 raise PermissionDenied()
-            elif result['error']['error_code'] == 6:
+            elif result['error']['error_code'] == Too_many_requests_per_second:
                 time.sleep(0.34)
                 continue
             else:
                 print(result)
                 raise Exception
         else:
-            ready = True
-    try:
-        api_call_result = result['response']
-    except KeyError:
-        print(result)
-        raise
+            break
+
+    api_call_result = result['response']
+
     return api_call_result
 
 
@@ -73,7 +85,7 @@ def get_user_id():
         r = do_api_call('users.get', params={'user_ids': user})
         result = r[0]['id']
 
-    except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+    except (DeletedUser, UnknownError, PermissionDenied, AccessDenied):
         result = []
 
     return result
@@ -87,7 +99,7 @@ def get_friends(user_id):
         r = do_api_call('friends.get', params={'user_id': user_id})
         result = r['items']
 
-    except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+    except (DeletedUser, UnknownError, PermissionDenied, AccessDenied):
         result = []
 
     return result
@@ -99,7 +111,7 @@ def get_groups_target_user(user_id):
     try:
         r = do_api_call('groups.get', params={'user_id': user_id})
         result = r['items']
-    except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+    except (DeletedUser, UnknownError, PermissionDenied, AccessDenied):
         result = []
 
     return result
@@ -116,7 +128,7 @@ def get_groups(friends):
             r = do_api_call('groups.get', params={'user_id': friend})
             groups.update({friend: r['items']})
             bar.update(i)
-        except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+        except (DeletedUser, UnknownError, PermissionDenied, AccessDenied):
             continue
 
     return groups
@@ -131,12 +143,12 @@ def get_user_groups_info(difference_user_groups):
     group_list = [difference_user_groups[i:i + 500] for i in range(0, len(difference_user_groups), 500)]
 
     for group in group_list:
-        group = (', '.join([str(i) for i in group]))
+        group = ', '.join([str(i) for i in group])
 
         try:
             group_info = do_api_call('groups.getById', params={'group_ids': group, 'fields': 'members_count'})
 
-        except(DeletedUser, UnknownError, PermissionDenied, AccessDenied):
+        except (DeletedUser, UnknownError, PermissionDenied, AccessDenied):
             continue
 
         groups_user_list_info.extend(group_info)
