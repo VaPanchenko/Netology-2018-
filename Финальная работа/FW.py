@@ -4,11 +4,11 @@ import time
 import json
 
 
-Deleted_User = 18
-Access_Denied = 15
-Internal_server_error = 10
-Permission_Denied = 7
-Too_many_requests_per_second = 6
+DELETED_USER = 18
+ACCESS_DENIED = 15
+INTERNAL_SERVER_ERROR = 10
+PERMISSION_DENIED = 7
+TOO_MANY_REQUESTS_PER_SECOND = 6
 
 
 class DeletedUser(Exception):
@@ -36,6 +36,11 @@ TOKEN = config['TOKEN']
 API_URL = 'https://api.vk.com/method/'
 
 
+def print_error_message(result):
+    print(result['error']['error_msg'], 'user/group - ',
+            result['error']['request_params'][2]['value'] )
+
+
 def do_api_call(api, params=None):
 
     params = params or {}
@@ -47,28 +52,30 @@ def do_api_call(api, params=None):
         result = requests.get(API_URL + api, params=params).json()
 
         if 'error' in result:
-            if result['error']['error_code'] == Deleted_User:
-                print(result['error']['error_msg'], 'user/group - ',
-                        result['error']['request_params'][2]['value'])
+
+            if result['error']['error_code'] == DELETED_USER:
+                print_error_message(result)
                 raise DeletedUser()
-            elif result['error']['error_code'] == Access_Denied:
-                print(result['error']['error_msg'], 'user/group - ',
-                        result['error']['request_params'][2]['value'])
+
+            elif result['error']['error_code'] == ACCESS_DENIED:
+                print_error_message(result)
                 raise AccessDenied()
-            elif result['error']['error_code'] == Internal_server_error:
-                print(result['error']['error_msg'], 'user/group - ',
-                        result['error']['request_params'][2]['value'])
+
+            elif result['error']['error_code'] == INTERNAL_SERVER_ERROR:
+                print_error_message(result)
                 raise UnknownError()
-            elif result['error']['error_code'] == Permission_Denied:
-                print(result['error']['error_msg'], 'user/group - ',
-                        result['error']['request_params'][2]['value'])
+
+            elif result['error']['error_code'] == PERMISSION_DENIED:
+                print_error_message(result)
                 raise PermissionDenied()
-            elif result['error']['error_code'] == Too_many_requests_per_second:
+
+            elif result['error']['error_code'] == TOO_MANY_REQUESTS_PER_SECOND:
                 time.sleep(0.34)
                 continue
+
             else:
                 print(result)
-                raise Exception
+                raise RuntimeError
         else:
             break
 
